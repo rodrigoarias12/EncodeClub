@@ -1,11 +1,8 @@
 import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
-//add ethers
 import { BigNumber, ethers } from "ethers";
 import { useAccount, useClient } from "wagmi";
 import { useEffect, useState } from "react";
-import { Main } from 'next/document';
+import Router  from 'next/router';
 export default function Home() {
   // use state to store the value of the input
   const [input, setInput] = useState("");
@@ -36,9 +33,26 @@ export default function Home() {
     const ethBalance = await randomSigner.getBalance();
     console.log(ethBalance);
   }
-  function requestTokens() {
+  async function requestTokens() {
     //todo: request tokens to be minted in the backend
     console.log("requestTokens");
+      //event.preventDefault();
+      
+      try {
+        const body = {
+          address: input,
+          amount: "10",
+          
+        };
+        await fetch('/api/Token/mint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+       // await Router.push('/admin/binance/');
+      } catch (error) {
+        console.error(error);
+      }
     //after the transaction you can call getBalance
 
   }
