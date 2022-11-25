@@ -24,7 +24,7 @@ export default async function handler(
 
     res.status(200).json({ balance : balance })
     //request tokens() mint from the contract
-
+    //delegate
     //conect ballot()  contract ballot 
     // todo fech informatio og that ballot to be displayed in the page
 
