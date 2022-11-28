@@ -23,28 +23,14 @@ export default function Home() {
   const [options, setOptions] = useState("");
   //amount
   const [amount, setAmount] = useState("");
-  //winnerName
+  const [balance, setBalance] = useState("");
+  const [votePower, setVotePower] = useState("");
   const [winnerName, setWinnerName] = useState("");
+  const [ethBalance, setEthBalance] = useState("");
+  const [status, setStatus] = useState("");
+  const [hash, setHash] = useState("");
 
 
-
-  async function getBalance() {
-    console.log("getBalance");
-    //create a provider
-    const provider = ethers.getDefaultProvider("goerli");
-    const contractAddress = "0x39311Fb4Fc198A6d481Dd7CcA9482EcBD1018F51";
-
-    console.log("contractAddress", contractAddress);
-    console.log("randomPrivateKey", randomPrivateKey);
-    const wallet = new ethers.Wallet(randomPrivateKey, provider);
-    const signer = wallet.connect(provider);
-    const erc20contractfactory = new MyToken__factory(signer);
-    _MyToken = await erc20contractfactory.attach(contractAddress as string);
-
-    const balance = await _MyToken.balanceOf(signer.address);
-    console.log("balance", balance.toString());
-
-  }
   async function createwallet() {
     console.log("createwallet");
     //create a provider
@@ -59,8 +45,14 @@ export default function Home() {
     const  randomMnemonic = random.mnemonic;
     const randomSigner = await random.connect(provider);
     const ethBalance = await randomSigner.getBalance();
-    console.log(ethBalance);
+    setEthBalance(ethBalance.toString());
+    document.getElementById("request")?.removeAttribute("hidden");
+    document.getElementById("delegate")?.removeAttribute("hidden");
+    document.getElementById("balance")?.removeAttribute("hidden");
+    document.getElementById("power")?.removeAttribute("hidden");
+    document.getElementById("vote")?.removeAttribute("hidden");
   }
+
   async function requestTokens() {
     //todo: request tokens to be minted in the backend
     console.log("requestTokens");
@@ -78,12 +70,49 @@ export default function Home() {
         body: JSON.stringify(body),
       });
       // await Router.push('/admin/binance/');
+      setStatus("Done! Check your balance.");
     } catch (error) {
       console.error(error);
     }
     //after the transaction you can call getBalance
-
   }
+
+  //delegate votes
+  async function autoDelegate() {
+    const provider = ethers.getDefaultProvider("goerli");
+    const contractAddress = "0x39311Fb4Fc198A6d481Dd7CcA9482EcBD1018F51";
+
+    console.log("contractAddress", contractAddress);
+    console.log("randomPrivateKey", randomPrivateKey);
+
+    const wallet = new ethers.Wallet(randomPrivateKey, provider);
+    const signer = wallet.connect(provider);
+    const erc20contractfactory = new MyToken__factory(signer);
+    _MyToken = await erc20contractfactory.attach(contractAddress);
+
+    const delegate = await _MyToken.delegate (signer.address);
+    const tx = await delegate.wait();
+
+    setHash(tx.transactionHash);
+  }
+
+  async function getBalance() {
+    console.log("getBalance");
+    //create a provider
+    const provider = ethers.getDefaultProvider("goerli");
+    const contractAddress = "0x39311Fb4Fc198A6d481Dd7CcA9482EcBD1018F51";
+
+    console.log("contractAddress", contractAddress);
+    console.log("randomPrivateKey", randomPrivateKey);
+    const wallet = new ethers.Wallet(randomPrivateKey, provider);
+    const signer = wallet.connect(provider);
+    const erc20contractfactory = new MyToken__factory(signer);
+    _MyToken = await erc20contractfactory.attach(contractAddress as string);
+
+    const blnce = await _MyToken.balanceOf(signer.address);
+    setBalance(blnce.toString());
+  }
+
   async function getVotesFromBallot() {
     const provider = ethers.getDefaultProvider("goerli");
     console.log("contractAddress", ballot);
@@ -92,23 +121,10 @@ export default function Home() {
     const signer = wallet.connect(provider);
     const ballotcontractfactory = new Ballot__factory(signer);
     _Ballot = await ballotcontractfactory.attach(ballot);
-    const votePower = await _Ballot.votePower(signer.address);
-    console.log("votePower", votePower.toString());
-  
+    const votePwr = await _Ballot.votePower(signer.address);
+    setVotePower(votePwr.toString());
   }
-  //get proposal
-  async function getProposal( _numero: any)  {
-    const provider = ethers.getDefaultProvider("goerli");
-    console.log("contractAddress", ballot);
-    console.log("randomPrivateKey", randomPrivateKey);
-    const wallet = new ethers.Wallet(randomPrivateKey, provider);
-    const signer = wallet.connect(provider);
-    const ballotcontractfactory = new Ballot__factory(signer);
-    _Ballot = await ballotcontractfactory.attach(ballot);
-    const proposals = await _Ballot.proposals(_numero);
-    console.log("proposals", proposals);
 
-  }
   //Voto in the ballot contract using option
   async function vote(_option: any) {
     //option is the number of the option
@@ -123,25 +139,9 @@ export default function Home() {
     const vote = await _Ballot.vote (  _option ,ethers.utils.parseEther(amount));
     console.log("vote", vote);
   }
-  //delegate votes
-  async function autoDelegate() {
-    const provider = ethers.getDefaultProvider("goerli");
-    const contractAddress = "0x39311Fb4Fc198A6d481Dd7CcA9482EcBD1018F51";
 
-    console.log("contractAddress", contractAddress);
-    console.log("randomPrivateKey", randomPrivateKey);
-    const wallet = new ethers.Wallet(randomPrivateKey, provider);
-    const signer = wallet.connect(provider);
-    const erc20contractfactory = new MyToken__factory(signer);
-    _MyToken = await erc20contractfactory.attach(contractAddress);
-
-    const delegate = await _MyToken.delegate (signer.address);
-    const tx = await delegate.wait();
-    console.log("transactionHash", tx.transactionHash );
-  }
-
-  //get winnerName
-  async function getWinnerName()  {
+  //get winner
+  async function getWinner()  {
     const provider = ethers.getDefaultProvider("goerli");
     console.log("contractAddress", ballot);
     console.log("randomPrivateKey", randomPrivateKey);
@@ -150,9 +150,11 @@ export default function Home() {
     const ballotcontractfactory = new Ballot__factory(signer);
     _Ballot = await ballotcontractfactory.attach(ballot);
     const winner = await _Ballot.winnerName();
-    console.log("winner", winner);
-    setWinnerName(winner);
+    console.log("winner", ethers.utils.parseBytes32String(winner));
+    setWinnerName(ethers.utils.parseBytes32String(winner));
   }
+
+    
     
 
   return (
@@ -167,15 +169,15 @@ export default function Home() {
 
       <section className="jumbotron text-center">
         <div className="container">
-          <h1 className="jumbotron-heading">Ballot token</h1>
+          <h1 className="jumbotron-heading">Ballot Contract</h1>
           <input type="text" className="form-control"
              value={ballot}           
-            onChange={(e) => setBallot(e.target.value)} 
-            placeholder="Ballot address" />
-          <p>
-            <a href="#" className="btn btn-primary my-2">Main call to action</a>
-            <a href="#" className="btn btn-secondary my-2">Secondary action</a>
-          </p>
+            onChange={(e) => {
+              setBallot(e.target.value);
+              e.target.value !== "" ? document.getElementById("create")?.removeAttribute("hidden") : document.getElementById("create")?.setAttribute("hidden", "hidden");
+              e.target.value !== "" ? document.getElementById("result")?.removeAttribute("hidden") : document.getElementById("result")?.setAttribute("hidden", "hidden");
+            }} 
+            placeholder="Place ballot contract address here" />
         </div>
       </section>
 
@@ -183,19 +185,44 @@ export default function Home() {
         <div className="row">
 
           <div className="col-sm">
-            <h2>Ballot token</h2>
-            <p>Get votes from ballot contract</p>         
-            <button className='btn btn-primary' onClick={getVotesFromBallot}>Get Votes</button>
+            <h2>Create Wallet</h2>
+            <p>Create a random wallet</p>
+            <button id="create" className='btn btn-primary' onClick={createwallet} hidden>Create wallet</button>
+            <p>Address: {address}</p>
+            <p>ETH Balance: {ethBalance} wei</p>
+          </div>
+
+          <div className="col-sm">
+            <h2>Request tokens</h2>
+            <p>Request tokens to be minted in the backend</p>
+            <button id="request" className='btn btn-primary' onClick={requestTokens} hidden>Request</button>
+            <p>{ status == "Done! Check your balance." ? status : "Please wait until this changes to continue."}</p>
+          </div>
+
+          <div className="col-sm">
+            <h2>Auto Delegate</h2>
+            <p>Auto delegate tokens to get voting rights</p>
+            <button id="delegate" className='btn btn-primary' onClick={autoDelegate} hidden>Delegate</button>
+            <p>Fund your account before delegating.</p>
+            <p>{ hash ? "Done! Please continue" : "Please wait until this changes to continue."}</p>
+          </div>
+
+          <div className="col-sm">
+            <h2>Get balance</h2>
+            <p>Get the token balance of the connected account</p>
+            <button id="balance" className='btn btn-primary' onClick={getBalance} hidden>Get balance</button>
+            <p>Balance: {balance}</p>
+          </div>
+
+          <div className="col-sm">
+            <h2>Voting Power</h2>
+            <p>Get voting power left of the connected account</p>         
+            <button id="power" className='btn btn-primary' onClick={getVotesFromBallot} hidden>Get Votes</button>
             <p>Votes: {votes}</p>
           </div>
-          <div className="col-sm">
-            <h2>Ballot token</h2>
-            <p>Get proposal</p>         
-            <button className='btn btn-primary' onClick={() => getProposal(0)}>Get proposal</button>
-            <p>Proposal: {votes}</p>
-          </div>
+
           <div className="col-xl">
-            <h2>Ballot token</h2>
+            <h2>Vote</h2>
             <p>Vote using Ballot contract </p>
             <select className="form-select" aria-label="Default select example" onChange={(e) => setOptions(e.target.value)}>
               <option selected>Select proposal</option>
@@ -209,36 +236,16 @@ export default function Home() {
               onChange={(e) => setAmount(e.target.value)}
               placeholder="amount" />
               <br></br>
-            <button className='btn btn-primary' onClick={() => vote(options)}>Vote</button>
-          </div>
-          <div className="col-sm">
-            <h2>Request tokens</h2>
-            <p>Request tokens to be minted in the backend</p>
-            <button className='btn btn-primary' onClick={requestTokens}>Request</button>
-          </div>
-          <div className="col-sm">
-            <h2>Auto delegate tokens</h2>
-            <p>Auto delegate tokens to the ballot contract</p>
-            <button className='btn btn-primary' onClick={autoDelegate}>Delegate</button>
+            <button id="vote" className='btn btn-primary' onClick={() => vote(options)} hidden>Vote</button>
           </div>
 
           <div className="col-sm">
-            <h2>Get balance</h2>
-            <p>Get the balance of the connected account</p>
-            <button className='btn btn-primary' onClick={getBalance}>Get balance</button>
+            <h2>Results</h2>
+            <p>Get winning proposal</p>         
+            <button id="result" className='btn btn-primary' onClick={() => getWinner()} hidden>Get proposal</button>
+            <p>Winning Proposal: {winnerName}</p>
           </div>
-          <div className="col-sm">
-            <h2>Get winnerName</h2>
-            <p>Get the winner name of the ballot</p>
-            <button className='btn btn-primary' onClick={getWinnerName}>Get Winner Name</button>
-            {winnerName && <p> {winnerName} </p>}
-          </div>
-          <div className="col-sm">
-            <h2>Create wallet</h2>
-            <p>Create a random wallet</p>
-            <button className='btn btn-primary' onClick={createwallet}>Create wallet</button>
-            <p>Address: {address}</p>
-          </div>
+
         </div>
       </div>
     </div>
