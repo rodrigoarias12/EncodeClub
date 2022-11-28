@@ -23,6 +23,8 @@ export default function Home() {
   const [options, setOptions] = useState("");
   //amount
   const [amount, setAmount] = useState("");
+  //winnerName
+  const [winnerName, setWinnerName] = useState("");
 
 
 
@@ -138,7 +140,19 @@ export default function Home() {
     console.log("transactionHash", tx.transactionHash );
   }
 
-    
+  //get winnerName
+  async function getWinnerName()  {
+    const provider = ethers.getDefaultProvider("goerli");
+    console.log("contractAddress", ballot);
+    console.log("randomPrivateKey", randomPrivateKey);
+    const wallet = new ethers.Wallet(randomPrivateKey, provider);
+    const signer = wallet.connect(provider);
+    const ballotcontractfactory = new Ballot__factory(signer);
+    _Ballot = await ballotcontractfactory.attach(ballot);
+    const winner = await _Ballot.winnerName();
+    console.log("winner", winner);
+    setWinnerName(winner);
+  }
     
 
   return (
@@ -212,6 +226,12 @@ export default function Home() {
             <h2>Get balance</h2>
             <p>Get the balance of the connected account</p>
             <button className='btn btn-primary' onClick={getBalance}>Get balance</button>
+          </div>
+          <div className="col-sm">
+            <h2>Get winnerName</h2>
+            <p>Get the winner name of the ballot</p>
+            <button className='btn btn-primary' onClick={getWinnerName}>Get Winner Name</button>
+            {winnerName && <p> {winnerName} </p>}
           </div>
           <div className="col-sm">
             <h2>Create wallet</h2>
