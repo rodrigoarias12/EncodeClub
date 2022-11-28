@@ -19,7 +19,7 @@ export default async function handler(
     let _MyToken: MyToken;
     //conect to goerli blockchain
     const provider = await ethers.providers.getDefaultProvider('goerli');
-    const contractAddress = process.env.CONTRACT_ADDRESS ;
+    const contractAddress = process.env.CONTRACT_ADDRESS_TOKEN ;
     console.log(contractAddress);
     const wallet = new ethers.Wallet(process.env.PRIVATE_KEY1!, provider);
     const signer = wallet.connect(provider);
