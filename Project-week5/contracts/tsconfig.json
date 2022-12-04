@@ -1,4 +1,4 @@
-{  "include": ["./scripts", "./tests", "./typechain-types", "../Project-week5/contracts/scripts/Deploy.ts"],
+{  "include": ["./scripts", "./tests", "./typechain-types"],
 "files": ["./hardhat.config.ts"],
   "compilerOptions": {  
     "target": "es2020",
