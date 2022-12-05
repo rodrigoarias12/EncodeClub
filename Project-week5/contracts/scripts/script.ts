@@ -8,8 +8,8 @@ let token: LotteryToken;
 let accounts: SignerWithAddress[];
 
 const BET_PRICE = 1;
-const BET_FEE = 0.2;
-const TOKEN_RATIO = 1;
+const BET_FEE = 0.1;
+const TOKEN_RATIO = 1000;
 
 async function main() {
   await initContracts();

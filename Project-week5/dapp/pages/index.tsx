@@ -4,9 +4,9 @@ import { useState } from "react";
 import { Lottery__factory } from '../typechain-types/factories/contracts/Lottery__factory'
 import { LotteryToken__factory } from '../typechain-types/factories/contracts/LotteryToken__factory';
 
-const BET_PRICE = 10;
-const BET_FEE = 1;
-const TOKEN_RATIO = 100;
+const BET_PRICE = 1;
+const BET_FEE = 0.1;
+const TOKEN_RATIO = 1000;
 
 export default function Home() {
 
@@ -38,8 +38,8 @@ export default function Home() {
   // const contractAddress = "0xf4E3f05fB4DC7608a30123d1ce9bB125eCCd4389";
   // const tokenContractAddress = "0xA418544Ff34CDF9fD0C2Bf08ea0a7b292690D743";
 
-  const contractAddress = "";
-  const tokenContractAddress = "";
+  const contractAddress = "0x8Bcc0916dE85F8E88377a53ff79946906810C005";
+  const tokenContractAddress = "0xEFC2481E05D1767cBbfb9e9804996a1d17915065";
   const alchemyKey = "";
 
   async function checkState() {
@@ -118,19 +118,19 @@ export default function Home() {
   }
   
   async function bet(amount: string) {
+    console.log(amount);
     const provider = new ethers.providers.AlchemyProvider("goerli", alchemyKey);
     const wallet = new ethers.Wallet(importkey, provider);
     const signer = wallet.connect(provider);
     const contractfactory = new Lottery__factory(signer);
-    const tokenContractFactory = new LotteryToken__factory(signer);
+   const tokenContractFactory = new LotteryToken__factory(signer);
     const _MyLottry = await contractfactory.attach(contractAddress);
-    const _MyTokn = await tokenContractFactory.attach(tokenContractAddress);
+   const _MyTokn = await tokenContractFactory.attach(tokenContractAddress);
 
-    const allowTx = await _MyTokn
-      .connect(signer)
-      .approve(_MyLottry.address, ethers.constants.MaxUint256);
-    await allowTx.wait();
-    const tx = await _MyLottry.connect(signer).betMany(amount);
+   const allowTx = await _MyTokn.approve(contractAddress, ethers.constants.MaxUint256);
+  const resultado= await allowTx.wait();
+   console.log(resultado.transactionHash)
+    const tx = await _MyLottry.betMany(amount);
     const receipt = await tx.wait();
     setPlacedBet(`Bets placed: ${receipt.transactionHash}`);
   }

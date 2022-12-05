@@ -8,8 +8,8 @@ let token: LotteryToken;
 let accounts: SignerWithAddress[];
 
 const BET_PRICE = 1;
-const BET_FEE = 0.2;
-const TOKEN_RATIO = 1;
+const BET_FEE = 0.1;
+const TOKEN_RATIO = 1000;
 async function main() {
 const contractFactory = await ethers.getContractFactory("Lottery");
 contract = await contractFactory.deploy(
@@ -20,6 +20,9 @@ contract = await contractFactory.deploy(
   ethers.utils.parseEther(BET_FEE.toFixed(18))
 );
 await contract.deployed();
+console.log(contract.address);
+const tokenAddress = await contract.paymentToken();
+console.log(tokenAddress);
 // const tokenAddress = await contract.paymentToken();
 
 // const tokenFactory = await ethers.getContractFactory("LotteryToken");
