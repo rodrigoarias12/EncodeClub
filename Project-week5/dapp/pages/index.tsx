@@ -38,8 +38,8 @@ export default function Home() {
   // const contractAddress = "0xf4E3f05fB4DC7608a30123d1ce9bB125eCCd4389";
   // const tokenContractAddress = "0xA418544Ff34CDF9fD0C2Bf08ea0a7b292690D743";
 
-  const contractAddress = "0x8Bcc0916dE85F8E88377a53ff79946906810C005";
-  const tokenContractAddress = "0xEFC2481E05D1767cBbfb9e9804996a1d17915065";
+  const contractAddress = "0x199a37092f54154eCE72888e7F901593996CFfce";
+  const tokenContractAddress = "0x6574BA77D0eed285CFdB781F04d01A77c4311596";
   const alchemyKey = "";
 
   async function checkState() {
