@@ -1,57 +1,33 @@
+import { BigNumber } from 'ethers';
+import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
-import { expect } from 'chai';
-import { BigNumber } from 'ethers';
-//token erc20
-//import { MyToken } from '../typechain-types/contracts/ERC20Votes.sol';
+//escrow    
+import { Escrow } from '../typechain-types/contracts/Escrow';
 
-require('dotenv').config();
-
-describe("Escrow contract", function () {
+describe('Escrow', async () => {
     let accounts: SignerWithAddress[];
-   
-    before(async function () {
-
+    let escrow: Escrow;
+    beforeEach(async function () {
         accounts = await ethers.getSigners();
-        
-    });
-  
-    it("should create a action with description and minimal amount", async function () {
-        const Escrow = await ethers.getContractFactory("Escrow");
-        const escrow = await Escrow.deploy();
+        const EscrowFactory = await ethers.getContractFactory('Escrow');
+        escrow = await EscrowFactory.deploy();
         await escrow.deployed();
-        const action = await escrow.createAction("Buy a car", 100);
-        const actionId = await action.wait();
-        const actionIdNumber = actionId.events[0].args[0].toNumber();
-        const actionInfo = await escrow.actions(actionIdNumber);
-        expect(actionInfo.description).to.equal("Buy a car");
-        expect(actionInfo.minAmount).to.equal(100);
+    });
+    it('should publish auction with tittle description and minAmount', async () => {
+        await escrow.PublishAuction('test', 'test', ethers.utils.parseEther('100'));
+        const auction = await escrow.auctions(0);
+        expect(auction.tittle).to.equal('test');
+        expect(auction.description).to.equal('test');
+        expect(auction.minAmount).to.equal(ethers.utils.parseEther('100'));
     });
     it("should publish an ofert in escrow", async function () {
-        const Escrow = await ethers.getContractFactory("Escrow");
-        const escrow = await Escrow.deploy();
-        await escrow.deployed();
-        const action = await escrow.createAction("Buy a car", 100);
-        const actionId = await action.wait();
-        const actionIdNumber = actionId.events[0].args[0].toNumber();
-        const ofert = await escrow.publishOfert(actionIdNumber, 100);
-        const ofertId = await ofert.wait();
-        const ofertIdNumber = ofertId.events[0].args[0].toNumber();
-        const ofertInfo = await escrow.oferts(ofertIdNumber);
-        expect(ofertInfo.amount).to.equal(100);
+        const publish = await escrow.PublishAuction('test', 'test',ethers.utils.parseEther('10'));
+        publish.wait();
+        await escrow.connect(accounts[1].address).Bid(0, {value: ethers.utils.parseEther('11')});
+        const ofert = await escrow.auctions(0);
+        expect(ofert.minAmount).to.equal(ethers.utils.parseEther('11'));
+        expect(ofert.highestBidder ).to.equal(accounts[1].address);
     });
-    it("Ofert Should be reverted amount should be more than minAmount  ", async function () {
-        const Escrow = await ethers.getContractFactory("Escrow");
-        const escrow = await Escrow.deploy();
-        await escrow.deployed();
-        const action = await escrow.createAction("Buy a car", 100);
-        const actionId = await action.wait();
-        const actionIdNumber = actionId.events[0].args[0].toNumber();
-        await expect(escrow.publishOfert(actionIdNumber, 50)).to.be.revertedWith("Amount should be more than minAmount");
-       
-    });
-    
-});
-// Path: Final-Project\contracts\Escrow.sol
 
-
+});  
