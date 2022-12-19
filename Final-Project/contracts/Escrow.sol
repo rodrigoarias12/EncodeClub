@@ -1,8 +1,7 @@
 /// SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.7.0 <0.9.0;
-import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract Escrow is AccessControl {
+contract Escrow  {
     //TODO add the auction struct
      struct Auction {
         uint id;
@@ -33,15 +32,9 @@ contract Escrow is AccessControl {
     
     //event AuctionClosed(uint id, uint minAmount, string tittle, string description, address owner, bool active, address payable highestBidder, uint256  closingTime);
 
-
-
-    //TODO add the code to initialize the contract
     constructor() {
         //TODO add the code to initialize the contract
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-
-
-    }
+        }
 
     function PublishAuction( string calldata tittle,string calldata description,uint minAmount) public 
     {
@@ -62,18 +55,17 @@ contract Escrow is AccessControl {
         escrows.push(newEscrow);
 
     }
-    function Bid(uint id) public payable
-    {
+    function Bid(uint id) public payable {
         //TODO add the code to bid on an auction
         Auction storage auction = auctions[id];
         require(auction.active == true, "The auction is not active");
         require(msg.value > auction.minAmount, "The amount is not enough");
         require(block.timestamp < auction.closingTime, "The auction is closed");
         //return the money to the previous highest bidder
-        payable(auction.highestBidder).transfer(auction.minAmount);
+        //payable(auction.highestBidder).transfer(auction.minAmount);
         //set the new highest bidder
         auction.minAmount = msg.value;
-        auction.highestBidder = payable(msg.sender);
+       // auction.highestBidder = payable(msg.sender);
 
     }
     function GetAuctions() public view returns (Auction[] memory)
