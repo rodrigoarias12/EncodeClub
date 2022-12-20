@@ -8,7 +8,7 @@ require("@nomiclabs/hardhat-ethers");
 const config: HardhatUserConfig = {
   solidity: "0.8.17",
   paths: { tests: "tests" },
-  defaultNetwork: "goerli",
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {},
     mumbai: {
@@ -23,6 +23,7 @@ const config: HardhatUserConfig = {
   },
   etherscan: {
     apiKey: {
+      goerli: process.env.ETHERSCAN_API_KEY,
       polygon: process.env.POLYGONSCAN_API_KEY || "",
       polygonMumbai: process.env.POLYGONSCAN_API_KEY || "",
     },
