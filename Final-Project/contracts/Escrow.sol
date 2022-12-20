@@ -26,6 +26,7 @@ contract Escrow  {
         uint auctionId;
         uint closingTime;
         }
+        
     Auction [] public auctions;
     EscrowType [] public escrows;
     uint public fee;

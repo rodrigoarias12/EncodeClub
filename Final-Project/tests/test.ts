@@ -3,7 +3,7 @@ import { expect } from 'chai';
 import { ethers } from 'hardhat';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 //escrow    
-import { Escrow } from '../typechain-types/contracts/Escrow';
+import { Escrow } from '../typechain-types/Escrow';
 const { time } = require("@nomicfoundation/hardhat-network-helpers");
 
 describe('Escrow', async () => {
