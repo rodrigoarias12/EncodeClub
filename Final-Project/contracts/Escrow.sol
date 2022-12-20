@@ -8,7 +8,7 @@ contract Escrow  {
         uint minAmount;
         string tittle;
         string description;
-        address owner;
+        address  owner;
         bool active;
         address payable highestBidder;
         uint256  closingTime;
@@ -28,12 +28,14 @@ contract Escrow  {
         }
     Auction [] public auctions;
     EscrowType [] public escrows;
-     event AuctionCreated(uint id, uint minAmount, string tittle, string description, address owner, bool active, address payable highestBidder, uint256  closingTime);
+    uint public fee;
+    event AuctionCreated(uint id, uint minAmount, string tittle, string description, address  owner, bool active, address payable highestBidder, uint256  closingTime);
     
     //event AuctionClosed(uint id, uint minAmount, string tittle, string description, address owner, bool active, address payable highestBidder, uint256  closingTime);
 
-    constructor() {
+    constructor(uint _fee) {
         //TODO add the code to initialize the contract
+         fee =  _fee;
         }
 
     function PublishAuction( string calldata tittle,string calldata description,uint minAmount) public 
@@ -62,10 +64,11 @@ contract Escrow  {
         require(msg.value > auction.minAmount, "The amount is not enough");
         require(block.timestamp < auction.closingTime, "The auction is closed");
         //return the money to the previous highest bidder
-        //payable(auction.highestBidder).transfer(auction.minAmount);
+        if(auction.highestBidder != address(0))
+         payable(auction.highestBidder).transfer(auction.minAmount);
         //set the new highest bidder
         auction.minAmount = msg.value;
-       // auction.highestBidder = payable(msg.sender);
+        auction.highestBidder = payable(msg.sender);
 
     }
     function GetAuctions() public view returns (Auction[] memory)
@@ -94,14 +97,15 @@ contract Escrow  {
         EscrowType storage escrow = escrows[id];
         require(escrow.active == true, "The escrow is not active");
         require(block.timestamp < escrow.closingTime, "The escrow is closed");
+         if(escrow.buyer == msg.sender)
+        {
+            escrow.buyerApproved = true;
+        }
         if(escrow.owner == msg.sender)
         {
             escrow.ownerApproved = true;
         }
-        else if(escrow.buyer == msg.sender)
-        {
-            escrow.buyerApproved = true;
-        }
+       
         if(escrow.ownerApproved == true && escrow.buyerApproved == true)
         {
             escrow.active = false;
